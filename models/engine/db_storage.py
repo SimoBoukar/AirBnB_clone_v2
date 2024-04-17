@@ -15,7 +15,7 @@ from sqlalchemy.orm import scoped_session
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
-classes = {"Amenity": Amenity, "City": City,
+tables = {"Amenity": Amenity, "City": City,
            "Place": Place, "Review": Review, "State": State, "User": User}
 
 
@@ -42,14 +42,18 @@ class DBStorage:
 
     def all(self, cls=None):
         """Query the current session and list all instances of class"""
-        new_dict = {}
-        for clss in classes:
-            if cls is None or cls is classes[clss] or cls is clss:
-                objs = self.__session.query(classes[clss]).all()
-                for obj in objs:
-                    key = obj.__class__.__name__ + '.' + obj.id
-                    new_dict[key] = obj
-        return (new_dict)
+        dictionary = {}
+        if cls:
+            for ins in self.__session.query(cls).all():
+                key = "{}.{}".format(cls.__name__, ins.id)
+                dictionary[key] = ins
+        else:
+            for table in tables:
+                cls = tables[table]
+                for ins in self.__session.query(cls).all():
+                    key = "{}.{}".format(cls.__name__, ins.id)
+                    dictionary[key] = ins
+        return dictionary
 
     def new(self, obj):
         """add the object to the current database session"""
