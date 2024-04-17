@@ -4,12 +4,12 @@ from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
 from sqlalchemy import create_engine, Column, Integer, String
 from os import getenv
+import models
 
-storage_engine = getenv("HBNB_TYPE_STORAGE")
 
 class User(BaseModel, Base):
     """This class defines a user by various attributes"""
-    if (storage_engine == "db"):
+    if (models.storage_engine == "db"):
         __tablename__ = 'users'
         email = Column(String(128), nullable=False)
         password = Column(String(128), nullable=False)
