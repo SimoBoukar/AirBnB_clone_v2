@@ -4,14 +4,19 @@ from models.base_model import BaseModel, Base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
 from models.city import City
+from os import getenv
 
+storage_engine = getenv("HBNB_TYPE_STORAGE")
 
 class State(BaseModel, Base):
     """ State class """
-    __tablename__ = 'states'
-    name = Column(String(128), nullable=False)
-    cities = relationship("City", cascade='all, delete, delete-orphan',
-                          back_populates='state')
+    if (storage_engine == "db"):
+        __tablename__ = 'states'
+        name = Column(String(128), nullable=False)
+        cities = relationship("City", cascade='all, delete, delete-orphan',
+                            back_populates='state')
+    else:
+        name = ""
 
     @property
     def cities(self):
