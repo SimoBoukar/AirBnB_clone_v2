@@ -46,16 +46,12 @@ class DBStorage:
     def all(self, cls=None):
         """Query the current session and list all instances of class"""
         dictionary = {}
-        if cls:
-            for ins in self.__session.query(cls).all():
-                key = "{}.{}".format(cls.__name__, ins.id)
-                dictionary[key] = ins
-        else:
-            for table in tables:
-                cls = tables[table]
-                for ins in self.__session.query(cls).all():
-                    key = "{}.{}".format(cls.__name__, ins.id)
-                    dictionary[key] = ins
+        for elem in tables:
+            if cls is None or cls is tables[elem] or cls is elem:
+                all_objs = self.__session.query(tables[elem]).all()
+                for obj in all_objs:
+                    key = obj.__class__.__name__ + '.' + obj.id
+                    dictionary[key] = obj
         return dictionary
 
     def new(self, obj):
