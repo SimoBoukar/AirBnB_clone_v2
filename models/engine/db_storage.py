@@ -16,8 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy import create_engine
 
 tables = {"Amenity": Amenity, "City": City,
-          "Place": Place, "Review": Review,
-          "State": State, "User": User}
+          "Place": Place, "Review": Review, "State": State, "User": User}
 
 
 class DBStorage:
