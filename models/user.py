@@ -15,8 +15,8 @@ class User(BaseModel, Base):
         password = Column(String(128), nullable=False)
         first_name = Column(String(128), nullable=True)
         last_name = Column(String(128), nullable=True)
-        places = relationship("Place", back_populate="user")
-        reviews = relationship("Review", back_populate="user")
+        places = relationship("Place", back_populates="user")
+        reviews = relationship("Review", back_populates="user")
     else:
         email = ""
         password = ""
