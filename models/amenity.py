@@ -8,7 +8,7 @@ import models
 
 
 class Amenity(BaseModel, Base):
-     """Amenity class"""
+    """Amenity class"""
     if models.storage_engine == "db":
         __tablename__ = "amenities"
         name = Column(String(128), nullable=False)
