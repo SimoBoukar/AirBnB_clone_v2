@@ -1,34 +1,28 @@
 #!/usr/bin/python3
 """ State Module for HBNB project """
-from sqlalchemy.ext.declarative import declarative_base
 from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
 from sqlalchemy import Column, Integer, String
 import models
 from models.city import City
-import shlex
+import os
 
 
 class State(BaseModel, Base):
     """ State class """
-
     __tablename__ = 'states'
     name = Column(String(128), nullable=False)
-    cities = relationship("City", cascade='all, delete, delete-orphan',
-                          backref='state')
+    cities = relationship(
+            "City", cascade="delete",
+            backref='state')
 
-    @property
-    def cities(self):
-        """Get the list of cities related to the state."""
-        var = models.storage.all()
-        lst = []
-        result = []
-        for key in var:
-            city = key.replace('.', ' ')
-            city = shlex.split(city)
-            if (city[0] == 'City'):
-                lst.append(var[key])
-        for elem in lst:
-            if (elem.state_id == self.id):
-                result.append(elem)
-        return (result)
+    if os.getenv("HBNB_TYPE_STORAGE") != "db":
+        @property
+        def cities(self):
+            """Get the list of cities related to the state."""
+            city_list = []
+            all_city = models.storage.all(City)
+            for city in all_city.values():
+                if city.state_id == self.id:
+                    city_list.append(city)
+            return city_list

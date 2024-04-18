@@ -6,13 +6,21 @@ from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import (create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from models.base_model import Base
+from models.base_model import BaseModel, Base
 from models.state import State
 from models.city import City
 from models.user import User
 from models.place import Place
 from models.review import Review
 from models.amenity import Amenity
+import os
+
+
+classes = {
+        'BaseModel': BaseModel, 'User': User, 'Place': Place,
+        'State': State, 'City': City, 'Amenity': Amenity,
+        'Review': Review
+        }
 
 
 class DBStorage:
@@ -38,21 +46,13 @@ class DBStorage:
     def all(self, cls=None):
         """Query the current session and list all instances of class"""
         dictionary = {}
-        if cls:
-            if type(cld) is str:
-                cls = eval(cls)
-            q = self.__session.query(cls)
-            for ins in q:
-                key = "{}.{}".format(type(ins).__name__, ins.id)
-                dictionary[key] = ins
-        else:
-            tables = [State, City, User, Place, Review, Amenity]
-            for table in tables:
-                q = self.__session.query(table)
-                for ins in q:
-                    key = "{}.{}".format(type(ins).__name__, ins.id)
-                    dictionary[key] = ins
-        return dictionary
+        for clas in classes:
+            if cls is None or cls is classes[clas] or cls is clas:
+                obj = self.__session.query(classes[clss]).all()
+                for obje in objs:
+                    key = obje.__class__.__name__ + '.' + obje.id
+                    dictionary[key] = obje
+        return (dictionary)
 
     def new(self, obj):
         """add the object to the current database session"""
@@ -66,10 +66,16 @@ class DBStorage:
         """delete from the current database session"""
         if obj:
             self.__session.delete(obj)
+            self.save()
 
     def reload(self):
         """reload method"""
         Base.metadata.create_all(self.__engine)
-        Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Scope = scoped_session(Session)
-        self.__session = Scope()
+        session_sec = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(session_sec)
+        self.__session = Session()
+
+    def close(self):
+        """ close method"""
+        if self.__session:
+            self.__session.close()

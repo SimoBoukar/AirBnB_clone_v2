@@ -118,37 +118,37 @@ class HBNBCommand(cmd.Cmd):
         Usage: create <class> <key 1>=<value 2> <key 2>=<value 2> ...
         Create a new class instance with given keys/values and print its id.
         """
-        try:
-            cla_name = args.split(" ")[0]
-        except IndexError:
-            pass
-        if not cla_name:
-            print("** Class name missing **")
+        args = args.split()
+        if not args:
+            print("** class name missing **")
             return
-        elif cla_name not in HBNBCommand.classes:
-            print("** Class doesn't exist **")
+        elif args[0] not in HBNBCommand.classes:
+            print("** class doesn't exist **")
             return
+        new_instance = HBNBCommand.classes[args[0]]()
+        for i in range(1, len(args)):
+            if (args[i].count("=") == 1):
+                attribute = args[i].split('=')
+                if type(attribute[0] == str):
+                    if (attribute[1].count('"') == 2):
+                        if (attribute[1].count('_') > 0):
+                            attribute[1] = attribute[1].replace('_', ' ')
 
-        params_list = args.split(" ")
-        obj = eval(cla_name)()
-
-        for i in range(1, len(params_list)):
-            key, val = tuple(params_list[i].split("="))
-            if val[0] == '"':
-                val = val.strip('"').replace("_", " ")
-            else:
-                try:
-                    val = eval(val)
-                except Exception:
-                    print("** coudn't evaluate {val}")
-                    pass
-
-            if hasattr(obj, key):
-                setattr(obj, key, val)
-
-        storage.new(obj)
-        obj.save()
-        print(obj.id)
+                        new_instance.__dict__.update({
+                            attribute[0]: attribute[1].strip('"')})
+                    elif (
+                            attribute[1].replace('.', '', 1).isdigit()
+                            or attribute[1].replace('.', '', 1).
+                            replace('-', '', 1)):
+                        if attribute[1].isdigit():
+                            new_instance.__dict__.update({
+                                attribute[0]: int(attribute[1])})
+                        else:
+                            new_instance.__dict__.update({
+                                attribute[0]: float(attribute[1])})
+        storage.new(new_instance)
+        storage.save()
+        print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -230,14 +230,14 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(args).items():
                 if k.split('.')[0] == args:
                     print_list.append(str(v))
         else:
-            for k, v in storage._FileStorage__objects.items():
+            for k, v in storage.all(args).items():
                 print_list.append(str(v))
 
-        print(print_list)
+        print('[%s]' % ', '.join(map(str, print_list)))
 
     def help_all(self):
         """ Help information for the all command """
