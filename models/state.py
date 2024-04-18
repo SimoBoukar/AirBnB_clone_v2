@@ -13,7 +13,7 @@ class State(BaseModel, Base):
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)
         cities = relationship("City", cascade='all, delete, delete-orphan',
-                              back_populates='state')
+                              backref='state')
     else:
         name = ""
 
@@ -22,7 +22,7 @@ class State(BaseModel, Base):
         def cities(self):
             """Get the list of cities related to the state."""
             city_list = []
-            for i in storage.all(City).values():
+            for i in models.storage.all(City).values():
                 if i.state_id == self.id:
                     city_list.append(i)
             return city_list

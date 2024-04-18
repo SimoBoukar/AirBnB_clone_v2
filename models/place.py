@@ -18,9 +18,12 @@ if models.storage_engine == "db":
                             Column('amenity_id', String(60),
                                 ForeignKey('amenities.id'),
                                 primary_key=True, nullable=False))
+
+
 class Place(BaseModel, Base):
     """ A place to stay """
     if models.storage_engine == "db":
+        __tablname__ = 'places'
         city_id = Column(String(60), ForeignKey("cities.id"), nullable=False)
         user_id = Column(String(60), ForeignKey("users.id"), nullable=False)
         name = Column(String(128), nullable=False)
@@ -31,11 +34,10 @@ class Place(BaseModel, Base):
         price_by_night = Column(Integer, nullable=False, default=0)
         latitude = Column(Float, nullable=True)
         longitude = Column(Float, nullable=True)
-        amenity_ids = []
-        reviews = relationship("Review", back_populates="place")
+        reviews = relationship("Review", backref="place")
         amenities = relationship("Amenity",
-                            secondary=place_amenity,
-                            back_populates="place_amenities",
+                            secondary="place_amenity",
+                            backref="place_amenities",
                             viewonly=False)
 
     else:
@@ -57,8 +59,8 @@ class Place(BaseModel, Base):
             result = []
             temp = classes['Review']
             for i in models.storage.all(temp).values():
-            if i.place_id == self.id:
-                result.append(i)
+                if i.place_id == self.id:
+                    result.append(i)
             return result
 
         @property
@@ -67,8 +69,8 @@ class Place(BaseModel, Base):
             result = []
             temp = classes['Amenity']
             for a in models.storage.all(temp).values():
-            if a in self.amenity_ids:
-                result.append(a)
+                if a in self.amenity_ids:
+                    result.append(a)
             return result
 
         @amenities.setter
