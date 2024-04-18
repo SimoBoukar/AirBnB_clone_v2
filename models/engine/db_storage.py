@@ -2,24 +2,17 @@
 """
     DBStorage class for SQLAlchemy
 """
-import models
-from models.base_model import BaseModel, Base
+from os import getenv
+from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy import (create_engine)
+from sqlalchemy.ext.declarative import declarative_base
+from models.base_model import Base
+from models.state import State
 from models.city import City
+from models.user import User
 from models.place import Place
 from models.review import Review
-from models.state import State
-from models.user import User
 from models.amenity import Amenity
-from os import environ, getenv
-from sqlalchemy.orm import scoped_session
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
-
-tables = {
-        "states": State, "cities": City,
-        "users": User, "places": Place,
-        "reviews": Review, "amenities": Amenity
-        }
 
 
 class DBStorage:
@@ -39,21 +32,25 @@ class DBStorage:
                 'mysql+mysqldb://{}:{}@{}/{}'.
                 format(user, password, host, database), pool_pre_ping=True)
 
-        if (env == 'test'):
+        if env == 'test':
             Base.metadata.drop_all(self.__engine)
 
     def all(self, cls=None):
         """Query the current session and list all instances of class"""
         dictionary = {}
         if cls:
-            for ins in self.__session.query(cls).all():
-                key = "{}.{}".format(cls.__name__, ins.id)
+            if type(cld) is str:
+                cls = eval(cls)
+            q = self.__session.query(cls)
+            for ins in q:
+                key = "{}.{}".format(type(ins).__name__, ins.id)
                 dictionary[key] = ins
         else:
+            tables = [State, City, User, Place, Review, Amenity]
             for table in tables:
-                cls = tables[table]
-                for ins in self.__session.query(cls).all():
-                    key = "{}.{}".format(cls.__name__, ins.id)
+                q = self.__session.query(table)
+                for ins in q:
+                    key = "{}.{}".format(type(ins).__name__, ins.id)
                     dictionary[key] = ins
         return dictionary
 
@@ -75,4 +72,4 @@ class DBStorage:
         Base.metadata.create_all(self.__engine)
         Session = sessionmaker(bind=self.__engine, expire_on_commit=False)
         Scope = scoped_session(Session)
-        self.__session = Scope
+        self.__session = Scope()
