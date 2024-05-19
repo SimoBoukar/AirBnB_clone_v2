@@ -3,6 +3,8 @@
 from models.base_model import BaseModel, Base
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.orm import relationship
+from models.place import Place
+from models.review import Review
 
 
 class User(BaseModel, Base):
@@ -10,7 +12,9 @@ class User(BaseModel, Base):
     __tablename__ = "users"
     email = Column("email", String(128), nullable=False)
     password = Column("password", String(128), nullable=False)
-    first_name = Column("first_name", String(128), nullable=True, default="NULL")
+    first_name = Column(
+            "first_name", String(128),
+            nullable=True, default="NULL")
     last_name = Column("last_name", String(128), nullable=True, default="NULL")
     places = relationship("Place", cascade="delete",
                           backref="user")
