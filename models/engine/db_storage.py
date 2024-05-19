@@ -6,21 +6,13 @@ from os import getenv
 from sqlalchemy.orm import sessionmaker, scoped_session
 from sqlalchemy import (create_engine)
 from sqlalchemy.ext.declarative import declarative_base
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from models.state import State
 from models.city import City
 from models.user import User
 from models.place import Place
 from models.review import Review
 from models.amenity import Amenity
-import os
-
-
-classes = {
-        'BaseModel': BaseModel, 'User': User, 'Place': Place,
-        'State': State, 'City': City, 'Amenity': Amenity,
-        'Review': Review
-        }
 
 
 class DBStorage:
@@ -46,12 +38,20 @@ class DBStorage:
     def all(self, cls=None):
         """Query the current session and list all instances of class"""
         dictionary = {}
-        for clas in classes:
-            if cls is None or cls is classes[clas] or cls is clas:
-                obj = self.__session.query(classes[clss]).all()
-                for obje in objs:
-                    key = obje.__class__.__name__ + '.' + obje.id
-                    dictionary[key] = obje
+        if cls:
+            if type(cls) is str:
+                cls = eval(cls)
+            query = self.__session.query(cls)
+            for elem in query:
+                key = "{}.{}".format(type(elem).__name__, elem.id)
+                dictionary[key] = elem
+        else:
+            lists = [State, City, User, Place, Review, Amenity]
+            for clase in lists:
+                query = self.__session.query(clase)
+                for elem in query:
+                    key = "{}.{}".format(type(elem).__name__, elem.id)
+                    dictionary[key] = elem
         return (dictionary)
 
     def new(self, obj):
@@ -66,7 +66,6 @@ class DBStorage:
         """delete from the current database session"""
         if obj:
             self.__session.delete(obj)
-            self.save()
 
     def reload(self):
         """reload method"""
@@ -76,5 +75,5 @@ class DBStorage:
         self.__session = Session()
 
     def close(self):
-        """ close method"""
+        """ call close()"""
         self.__session.close()
