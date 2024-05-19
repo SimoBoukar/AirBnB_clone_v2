@@ -16,13 +16,17 @@ class State(BaseModel, Base):
             "City", cascade="delete",
             backref='state')
 
-    if os.getenv("HBNB_TYPE_STORAGE") != "db":
-        @property
-        def cities(self):
-            """Get the list of cities related to the state."""
-            city_list = []
-            all_city = models.storage.all(City)
-            for city in all_city.values():
-                if city.state_id == self.id:
-                    city_list.append(city)
-            return city_list
+    @property
+    def cities(self):
+        variables = models.storage.all()
+        list_city = []
+        result_city = []
+        for key in variables:
+            city = key.replace('.', ' ')
+            city = shlex.split(city)
+            if (city[0] == 'City'):
+                list_city.append(variables[key])
+        for elemnts in list_city:
+            if (elemnts.state_id == self.id):
+                result_city.append(elemnts)
+        return (result_city)
